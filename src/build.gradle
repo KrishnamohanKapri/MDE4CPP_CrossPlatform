@@ -1,0 +1,175 @@
+/*
+ * MDE4CPP - Model Driven Engineering for C++
+ *
+ * Copyright (c) TU Ilmenau, Systems and Software Engineering Group
+ * All rights reserved.
+ *
+ * MIT License
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this
+ * software and associated documentation files (the "Software"), to deal in the Software
+ * without restriction, including without limitation the rights to use, copy, modify, merge,
+ * publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+ * to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+ * FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
+
+description 'Models and generated source code collection'
+
+import org.gradle.internal.os.OperatingSystem;
+
+task deliverBasicInterfaces() {
+	group 'Basic interfaces'
+	description 'deliver abstractDataTypes, util, persistence and pluginFramework interfaces'
+		
+	dependsOn 'common:abstractDataTypes:deliverAbstractDataTypes'
+	dependsOn 'common:pluginFramework:deliverPluginFrameworkInterface'
+	dependsOn 'common:persistence:deliverPersistenceInterface'
+	dependsOn 'util:deliverUtil'
+}
+
+task buildEcoreModels() {
+	group 'Source'
+	description 'generate and compile all ecore models'
+	
+	dependsOn 'generateEcoreModels'
+	dependsOn 'compileEcoreModels'
+	dependsOn 'ecore:buildEcore'
+	dependsOn 'uml:types:buildTypes'
+	dependsOn 'uml:uml:buildUml'
+	dependsOn 'fuml:buildFUML'
+	dependsOn 'pscs:buildPSCS'
+	dependsOn 'pssm:buildPSSM'
+}
+
+task buildReflectionModels() {
+	group 'Source'
+	description 'generate and compile reflection models'
+	
+	dependsOn 'common:ecoreReflection:buildEcoreReflection'
+	dependsOn 'common:primitivetypesReflection:buildPrimitivetypesReflection'
+	dependsOn 'common:umlReflection:buildUmlReflection'
+}
+
+task buildUMLProfiles() {
+	group 'Source'
+	description 'generate and compile uml profile models'
+	
+	dependsOn 'common:standardProfile:buildStandardProfile'
+	dependsOn 'common:UML4CPPProfile:buildUML4CPPProfile'
+}
+
+task buildOCLAll() { 
+	group 'Source'
+	description 'generate and compile All OCL components meta-model and parser'
+	
+	dependsOn 'ocl:oclModel:buildOcl'
+	dependsOn 'ocl:oclParser:buildOclParser'
+}	
+
+task compileEcoreModels(){
+	group 'Source'
+	description 'compile all ecore models'
+
+	dependsOn 'ecore:compileEcore'
+	dependsOn 'uml:types:compileTypes'
+	dependsOn 'uml:uml:compileUml'
+	dependsOn 'fuml:compileFUML'
+	dependsOn 'pscs:compilePSCS'
+	dependsOn 'pssm:compilePSSM'
+	
+	mustRunAfter =  ['ecore:generateEcore'
+		, 'uml:types:generateTypes'
+		, 'uml:uml:generateUml'
+		, 'fuml:generateFUML'
+		, 'pscs:generatePSCS'
+		, 'pssm:generatePSSM'
+		, 'ocl:oclModel:generateOcl'
+		]	
+}
+
+// Compile all without generating the models
+task compileReflectionModels() {
+	group 'Source'
+	description 'compile all reflection models'
+	
+	dependsOn 'common:ecoreReflection:compileEcoreReflection'
+	dependsOn 'common:primitivetypesReflection:compilePrimitivetypesReflection'
+	dependsOn 'common:umlReflection:compileUmlReflection'
+	
+}
+
+task compileUMLProfiles() {
+	group 'Source'
+	description 'compile all uml profile models'
+	
+	dependsOn 'common:standardProfile:compileStandardProfile'
+	dependsOn 'common:UML4CPPProfile:compileUML4CPPProfile'
+}
+
+task compileOCLAll() {
+	group 'Source'
+	description 'compile OCL meta-model and parser'
+
+	dependsOn 'ocl:oclModel:compileOcl'
+	dependsOn 'ocl:oclParser:compileOclParser' 
+}
+
+task generateEcoreModels() {
+	group 'Source'
+	description 'generate all ecore models'
+	
+	dependsOn 'ecore:generateEcore'
+	dependsOn 'uml:types:generateTypes'
+	dependsOn 'uml:uml:generateUml'
+	dependsOn 'fuml:generateFUML'
+	dependsOn 'pscs:generatePSCS'
+	dependsOn 'pssm:generatePSSM'
+	dependsOn 'ocl:oclModel:generateOcl'
+}
+
+task generateReflectionModels() {
+	group 'Source'
+	description 'generate all reflection models'
+	
+	dependsOn 'common:ecoreReflection:generateEcoreReflection'
+	dependsOn 'common:primitivetypesReflection:generatePrimitivetypesReflection'
+	dependsOn 'common:umlReflection:generateUmlReflection'
+}
+
+task generateUMLProfiles() {
+	group 'Source'
+	description 'generate all uml profile models'
+	
+	dependsOn 'common:standardProfile:generateStandardProfile'
+	dependsOn 'common:UML4CPPProfile:generateUML4CPPProfile'
+}
+
+/**
+ * Convert line endings on GNU/Linux & macOS
+ */
+task dos2unix_srcgen {
+	doLast {
+		fileTree('.').matching{ 
+			include "**/src_gen/**/*.hpp"
+			include "**/src_gen/**/*.cpp"
+			exclude "**/.cmake"
+		}.each { 
+			aFile -> exec{
+			    commandLine 'dos2unix'
+			    args aFile.absolutePath
+			}
+		}
+	}
+}
+
+//EOF
