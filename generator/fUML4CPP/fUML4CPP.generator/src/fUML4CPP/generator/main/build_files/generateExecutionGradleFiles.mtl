@@ -361,7 +361,8 @@ and handle dependencies to other models
 	mustRunAfter = [
 		"generate[packageName.toUpperFirst()/]"
 [for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
-	] + getRootProject().getTasksByName('compile[packName.toUpperFirst()/]', true) + getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true) + [
+		, getRootProject().getTasksByName('compile[packName.toUpperFirst()/]', true)
+		, getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
 [/for]
 	]
 [/template]

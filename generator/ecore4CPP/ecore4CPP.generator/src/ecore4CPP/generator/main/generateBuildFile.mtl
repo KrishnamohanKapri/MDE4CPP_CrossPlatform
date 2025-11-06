@@ -507,11 +507,13 @@ and handle dependencies to other models
 	mustRunAfter = [
 		'generate[packageName.toUpperFirst()/]'
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-	] + getRootProject().getTasksByName('compile[pack.name.toUpperFirst()/]', true) + getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true) + [
+		, getRootProject().getTasksByName('compile[pack.name.toUpperFirst()/]', true)
+		, getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
 [/for]
 [for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
 [if (not (libName.oclIsUndefined() or libName = ''))]
-	] + getRootProject().getTasksByName('compile[libName.toUpperFirst()/]', true) + getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true) + [
+		, getRootProject().getTasksByName('compile[libName.toUpperFirst()/]', true)
+		, getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
 [/if]
 [/for]
 	]
