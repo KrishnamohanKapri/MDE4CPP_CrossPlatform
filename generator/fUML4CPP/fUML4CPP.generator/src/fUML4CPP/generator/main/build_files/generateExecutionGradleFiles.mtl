@@ -93,19 +93,21 @@ task compile[packageName.toUpperFirst()/] {
 	group '[packageName/]'
 	description 'compile [packageName/]'
 
-	def buildFile = file('src_gen/build.gradle')
-	if(!buildFile.exists()){ [comment only if src_gen folder is removed, regenerate src_gen folder and compile external/]
-		dependsOn 'generate[packageName.toUpperFirst()/]'
-		mustRunAfter = ['['/]"generate[packageName.toUpperFirst()/]"[']'/]
-		dependsOn 'runCommandCompile[packageName.toUpperFirst()/]'
+	[comment Always ensure generation runs first /]
+	dependsOn 'generate[packageName.toUpperFirst()/]'
+	mustRunAfter = ['['/]"generate[packageName.toUpperFirst()/]"[']'/]
+	
+	[comment Check file existence lazily - evaluated after generation completes /]
+	doFirst {
+		def buildFile = file('src_gen/build.gradle')
+		if(!buildFile.exists()){
+			throw new GradleException('src_gen/build.gradle not found after generation. Generation may have failed.')
+		}
 	}
-	else
-	{
-	[comment if(buildFile.exists()){ only if src_gen folder is removed, regenerate src_gen folder and compile external/]
-		[comment dependsOn 'generate[packageName.toUpperFirst()/?' /]
-		mustRunAfter = ['['/]"generate[packageName.toUpperFirst()/]"[']'/]
-		dependsOn 'src_gen:compile[packageName.toUpperFirst()/]Src'
-	}
+	
+	[comment Always use direct dependency - generation ensures src_gen exists /]
+	dependsOn 'src_gen:compile[packageName.toUpperFirst()/]Src'
+	
 	[aPackage.generateMustRunAfter()/]
 }
 
