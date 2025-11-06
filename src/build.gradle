@@ -80,7 +80,7 @@ task compileEcoreModels(){
 	group 'Source'
 	description 'compile all ecore models'
 
-	dependsOn 'ecore:compileEcore'
+	dependsOn 'ecore:buildEcore'
 	dependsOn 'uml:types:compileTypes'
 	dependsOn 'uml:uml:compileUml'
 	dependsOn 'fuml:compileFUML'
@@ -94,7 +94,13 @@ task compileEcoreModels(){
 		, 'pscs:generatePSCS'
 		, 'pssm:generatePSSM'
 		, 'ocl:oclModel:generateOcl'
-		]	
+		]
+	
+	tasks.getByPath('uml:types:compileTypes').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('uml:uml:compileUml').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('fuml:compileFUML').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('pscs:compilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('pssm:compilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
 }
 
 // Compile all without generating the models
