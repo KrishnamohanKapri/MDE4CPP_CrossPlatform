@@ -347,9 +347,8 @@ and handle dependencies to other models
 
 [template private generateInputsFilesForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
 [for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
-	def build[packName/] = getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
-	if (!build[packName/].isEmpty()) {
-		inputs.files(build[packName/].outputs)
+	getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true).each { task ->
+		inputs.files(task.outputs.files)
 	}
 [/for]
 [/template]
