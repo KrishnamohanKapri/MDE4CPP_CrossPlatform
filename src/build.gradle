@@ -72,8 +72,12 @@ task buildOCLAll() {
 	group 'Source'
 	description 'generate and compile All OCL components meta-model and parser'
 	
+	dependsOn 'ecore:buildEcore'
 	dependsOn 'ocl:oclModel:buildOcl'
 	dependsOn 'ocl:oclParser:buildOclParser'
+	
+	tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter tasks.getByPath('ecore:buildEcore')
 }	
 
 task compileEcoreModels(){
@@ -101,6 +105,19 @@ task compileEcoreModels(){
 	tasks.getByPath('fuml:compileFUML').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('pscs:compilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('pssm:compilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
+}
+
+// Compile all without generating the models
+task compileOCLAll() {
+	group 'Source'
+	description 'compile all OCL components'
+	
+	dependsOn 'ecore:buildEcore'
+	dependsOn 'ocl:oclModel:compileOcl'
+	dependsOn 'ocl:oclParser:compileOclParser'
+	
+	tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter tasks.getByPath('ecore:buildEcore')
 }
 
 // Compile all without generating the models
