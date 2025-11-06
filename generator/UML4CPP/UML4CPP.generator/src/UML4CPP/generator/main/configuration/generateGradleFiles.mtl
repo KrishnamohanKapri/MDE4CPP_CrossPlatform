@@ -154,7 +154,9 @@ task build[packageName.toUpperFirst()/]() {
 
 [template private generateDependsOnForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
 [for (packName : String | aPackage.collectIncludingModelNames()) ? (not(packName = aPackage.name))]
-	dependsOn getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
+	getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true).each { task ->
+		dependsOn task
+	}
 [/for]
 [/template]
 

@@ -473,11 +473,15 @@ and handle dependencies to other models
 
 [template private generateDependsOnForRunCommand(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-	dependsOn getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
+	getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true).each { task ->
+		dependsOn task
+	}
 [/for]
 [for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
 [if (not (libName.oclIsUndefined() or libName = ''))]
-	dependsOn getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
+	getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true).each { task ->
+		dependsOn task
+	}
 [/if]
 [/for]
 [/template]
