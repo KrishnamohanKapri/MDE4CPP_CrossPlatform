@@ -161,6 +161,19 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	[aPackage.generateDependsOnForRunCommand()/]
 	[aPackage.generateInputsFilesForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
+	doFirst {
+		[comment Ensure dependency build tasks have completed and outputs exist /]
+[for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
+		def build[pack.name/]Tasks = getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
+		build[pack.name/]Tasks.each { task ->
+			task.outputs.files.each { file ->
+				if (!file.exists() && !file.isDirectory()) {
+					throw new GradleException("Dependency output does not exist: " + file.absolutePath + ". Task " + task.path + " must complete first.")
+				}
+			}
+		}
+[/for]
+	}
 }
 
 task runCommandGenerate[packageName.toUpperFirst()/](type: tui.sse.mde4cpp.MDE4CPPGenerate) {
