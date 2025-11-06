@@ -107,12 +107,20 @@ task compileEcoreModels(){
 	tasks.getByPath('pscs:compilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('pssm:compilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	
-	// Also ensure runCommandCompile tasks wait for buildEcore
-	tasks.getByPath('uml:types:runCommandCompileTypes').mustRunAfter tasks.getByPath('ecore:buildEcore')
-	tasks.getByPath('uml:uml:runCommandCompileUml').mustRunAfter tasks.getByPath('ecore:buildEcore')
-	tasks.getByPath('fuml:runCommandCompileFUML').mustRunAfter tasks.getByPath('ecore:buildEcore')
-	tasks.getByPath('pscs:runCommandCompilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
-	tasks.getByPath('pssm:runCommandCompilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
+	def runCommandTasks = [
+		'uml:types:runCommandCompileTypes',
+		'uml:uml:runCommandCompileUml',
+		'fuml:runCommandCompileFUML',
+		'pscs:runCommandCompilePSCS',
+		'pssm:runCommandCompilePSSM'
+	]
+	runCommandTasks.each { taskPath ->
+		def tasks = getRootProject().getTasksByName(taskPath, true)
+		if (!tasks.isEmpty()) {
+			tasks.each { task -> task.mustRunAfter tasks.getByPath('ecore:buildEcore') }
+		}
+	}
 }
 
 // Compile all without generating the models
