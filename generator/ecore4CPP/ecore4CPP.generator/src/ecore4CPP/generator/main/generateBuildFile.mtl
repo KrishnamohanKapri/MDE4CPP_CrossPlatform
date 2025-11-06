@@ -483,22 +483,20 @@ and handle dependencies to other models
 [/template]
 
 [template private generateInputsFilesForRunCommand(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
+	def allDepOutputs = files()
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-	def depOutputs = files()
 	getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true).each { task ->
-		depOutputs.from(task.outputs.files)
+		allDepOutputs.from(task.outputs.files)
 	}
-	inputs.files(depOutputs)
 [/for]
 [for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
 [if (not (libName.oclIsUndefined() or libName = ''))]
-	def depOutputsLib = files()
 	getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true).each { task ->
-		depOutputsLib.from(task.outputs.files)
+		allDepOutputs.from(task.outputs.files)
 	}
-	inputs.files(depOutputsLib)
 [/if]
 [/for]
+	inputs.files(allDepOutputs)
 [/template]
 
 [template private generateMustRunAfter(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]

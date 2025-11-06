@@ -346,13 +346,13 @@ and handle dependencies to other models
 [/template]
 
 [template private generateInputsFilesForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
+	def allDepOutputs = files()
 [for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
-	def depOutputs = files()
 	getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true).each { task ->
-		depOutputs.from(task.outputs.files)
+		allDepOutputs.from(task.outputs.files)
 	}
-	inputs.files(depOutputs)
 [/for]
+	inputs.files(allDepOutputs)
 [/template]
 
 [template private generateMustRunAfter(aPackage : Package) {packageName : String = getPackageName();}]
