@@ -171,13 +171,7 @@ task build[packageName.toUpperFirst()/]() {
 [/template]
 
 [template private generateMustRunAfter(aPackage : Package) {packageName : String = getPackageName();}]
-	mustRunAfter = [
-		"generate[packageName.toUpperFirst()/]"
-[for (packName : String | aPackage.collectIncludingModelNames()) ? (not(packName = aPackage.name))]
-		, getRootProject().getTasksByName('compile[packName.toUpperFirst()/]', true)
-		, getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
-[/for]
-	]
+	mustRunAfter = ["generate[packageName.toUpperFirst()/]"[for (packName : String | aPackage.collectIncludingModelNames()) ? (not(packName = aPackage.name))] + getRootProject().getTasksByName('compile[packName.toUpperFirst()/]', true) + getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)[/for]]
 [/template]
 
 
