@@ -206,15 +206,14 @@ task compile[packageName.toUpperFirst()/]() {
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 	mustRunAfter = ['['/]"generate[packageName.toUpperFirst()/]"[']'/]
 	
-	[comment Check if src_gen project exists - evaluated at configuration time after generation /]
+	[comment Check if src_gen/build.gradle exists - if not, use runCommandCompile which will work after generation /]
 	def buildFile = file('src_gen'+ File.separator + 'build.gradle')
-	def srcGenProject = project.findProject(':src_gen')
 	
-	if(buildFile.exists() && srcGenProject != null) {
-		[comment Use direct dependency if src_gen project exists /]
+	if(buildFile.exists()) {
+		[comment Use direct dependency if src_gen/build.gradle exists /]
 		dependsOn 'src_gen:compile[packageName.toUpperFirst()/]Src'
 	} else {
-		[comment Fallback to runCommandCompile if src_gen doesn't exist yet /]
+		[comment Use runCommandCompile if src_gen doesn't exist yet - generation will create it first /]
 		dependsOn 'runCommandCompile[packageName.toUpperFirst()/]'
 	}
 	
