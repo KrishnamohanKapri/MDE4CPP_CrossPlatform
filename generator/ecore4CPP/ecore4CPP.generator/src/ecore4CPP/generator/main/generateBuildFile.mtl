@@ -484,14 +484,16 @@ and handle dependencies to other models
 
 [template private generateInputsFilesForRunCommand(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-	getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true).each { task ->
-		inputs.files(task.outputs)
+	def build[pack.name/] = getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
+	if (!build[pack.name/].isEmpty()) {
+		inputs.files(build[pack.name/].outputs)
 	}
 [/for]
 [for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
 [if (not (libName.oclIsUndefined() or libName = ''))]
-	getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true).each { task ->
-		inputs.files(task.outputs)
+	def build[libName/] = getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
+	if (!build[libName/].isEmpty()) {
+		inputs.files(build[libName/].outputs)
 	}
 [/if]
 [/for]
