@@ -157,6 +157,8 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	} else {
 		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compile[packageName.toUpperFirst()/]Src'
 	}
+	dependsOn 'generate[packageName.toUpperFirst()/]'
+	[aPackage.generateDependsOnForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
 }
 
@@ -467,6 +469,17 @@ and handle dependencies to other models
 [/file]
 [/template]
 
+
+[template private generateDependsOnForRunCommand(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
+[for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
+	dependsOn getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
+[/for]
+[for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
+[if (not (libName.oclIsUndefined() or libName = ''))]
+	dependsOn getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
+[/if]
+[/for]
+[/template]
 
 [template private generateMustRunAfter(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
 mustRunAfter =  ['['/]

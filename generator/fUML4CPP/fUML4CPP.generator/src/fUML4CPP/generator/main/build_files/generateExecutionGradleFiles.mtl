@@ -48,6 +48,8 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	} else {
 		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compile[packageName.toUpperFirst()/]Src'
 	}
+	dependsOn 'generate[packageName.toUpperFirst()/]'
+	[aPackage.generateDependsOnForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
 }
 
@@ -334,6 +336,12 @@ include ':application'
 and handle dependencies to other models
 /]
 [/file]
+[/template]
+
+[template private generateDependsOnForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
+[for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
+	dependsOn getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
+[/for]
 [/template]
 
 [template private generateMustRunAfter(aPackage : Package) {packageName : String = getPackageName();}]
