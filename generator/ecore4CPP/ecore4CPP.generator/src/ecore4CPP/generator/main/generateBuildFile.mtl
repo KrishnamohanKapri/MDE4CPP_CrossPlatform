@@ -164,11 +164,10 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	doFirst {
 		[comment Ensure dependency build tasks have completed and outputs exist /]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-		def build[pack.name/]Tasks = getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
-		build[pack.name/]Tasks.each { task ->
-			task.outputs.files.each { file ->
-				if (!file.exists() && !file.isDirectory()) {
-					throw new GradleException("Dependency output does not exist: " + file.absolutePath + ". Task " + task.path + " must complete first.")
+		getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true).each { depTask ->
+			depTask.outputs.files.each { outputFile ->
+				if (outputFile != null && !outputFile.isDirectory() && !outputFile.exists()) {
+					throw new GradleException("Dependency output does not exist: " + outputFile.absolutePath + ". Task " + depTask.path + " must complete first.")
 				}
 			}
 		}
