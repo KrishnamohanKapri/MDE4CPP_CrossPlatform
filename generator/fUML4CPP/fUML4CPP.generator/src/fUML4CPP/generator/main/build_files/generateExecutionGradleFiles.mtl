@@ -36,11 +36,17 @@ import org.gradle.internal.os.OperatingSystem;
 description 'Build tasks for project: [packageName/]'
 
 task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment internal task --> no group --> no visualisation in gradle tasks/]
-	workingDir project.rootDir
+	workingDir project.projectDir
+	def rootPath = project.rootDir.toPath()
+	def projectPath = project.projectDir.toPath()
+	def relativeToRoot = rootPath.relativize(projectPath)
+	def depth = relativeToRoot.nameCount
+	def gradlewRelPath = '../' * depth + 'application/tools/gradlew'
 	if (OperatingSystem.current().isWindows()) {
-		commandLine 'cmd', '/c', 'application\\tools\\gradlew.bat src_gen:compile[packageName.toUpperFirst()/]Src'
+		def gradlewPathWin = gradlewRelPath.replace('/', '\\')
+		commandLine 'cmd', '/c', gradlewPathWin + '.bat src_gen:compile[packageName.toUpperFirst()/]Src'
 	} else {
-		commandLine '/bin/sh', '-c', 'application/tools/gradlew src_gen:compile[packageName.toUpperFirst()/]Src'
+		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compile[packageName.toUpperFirst()/]Src'
 	}
 	[aPackage.generateMustRunAfter()/]
 }
@@ -67,11 +73,17 @@ task generate[packageName.toUpperFirst()/]() {
 
 [if(aPackage.hasMainBehavior())]
 task runCommandCompileApplicationFor[packageName.toUpperFirst()/](type:Exec) {
-	workingDir project.rootDir
+	workingDir project.projectDir
+	def rootPath = project.rootDir.toPath()
+	def projectPath = project.projectDir.toPath()
+	def relativeToRoot = rootPath.relativize(projectPath)
+	def depth = relativeToRoot.nameCount
+	def gradlewRelPath = '../' * depth + 'application/tools/gradlew'
 	if (OperatingSystem.current().isWindows()) {
-		commandLine 'cmd', '/c', 'application\\tools\\gradlew.bat application:compileApplicationFor[packageName.toUpperFirst()/]Src'
+		def gradlewPathWin = gradlewRelPath.replace('/', '\\')
+		commandLine 'cmd', '/c', gradlewPathWin + '.bat application:compileApplicationFor[packageName.toUpperFirst()/]Src'
 	} else {
-		commandLine '/bin/sh', '-c', 'application/tools/gradlew application:compileApplicationFor[packageName.toUpperFirst()/]Src'
+		commandLine '/bin/sh', '-c', gradlewRelPath + ' application:compileApplicationFor[packageName.toUpperFirst()/]Src'
 	}
 	dependsOn 'compile[packageName.toUpperFirst()/]'
 }
