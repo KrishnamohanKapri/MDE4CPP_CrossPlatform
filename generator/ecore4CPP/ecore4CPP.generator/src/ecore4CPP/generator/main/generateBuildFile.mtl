@@ -159,6 +159,7 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	}
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 	[aPackage.generateDependsOnForRunCommand()/]
+	[aPackage.generateInputsFilesForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
 }
 
@@ -477,6 +478,23 @@ and handle dependencies to other models
 [for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
 [if (not (libName.oclIsUndefined() or libName = ''))]
 	dependsOn getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
+[/if]
+[/for]
+[/template]
+
+[template private generateInputsFilesForRunCommand(aPackage : EPackage) {packageName : String = aPackage.generatePackageName();}]
+[for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
+	def depTasks = getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true)
+	depTasks.all { task ->
+		inputs.files(task.outputs)
+	}
+[/for]
+[for (libName : String | aPackage.eAllContents()->filter(EClass)->reject(doNotGenerateEClassifier())->select(c : EClass | c.hasKey(keyLibrary())).valueKeys(keyLibrary())->asOrderedSet())]
+[if (not (libName.oclIsUndefined() or libName = ''))]
+	def depTasksLib = getRootProject().getTasksByName('build[libName.toUpperFirst()/]', true)
+	depTasksLib.all { task ->
+		inputs.files(task.outputs)
+	}
 [/if]
 [/for]
 [/template]

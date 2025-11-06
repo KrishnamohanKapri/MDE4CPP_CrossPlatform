@@ -50,6 +50,7 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	}
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 	[aPackage.generateDependsOnForRunCommand()/]
+	[aPackage.generateInputsFilesForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
 }
 
@@ -341,6 +342,15 @@ and handle dependencies to other models
 [template private generateDependsOnForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
 [for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
 	dependsOn getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
+[/for]
+[/template]
+
+[template private generateInputsFilesForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
+[for (packName : String | aPackage.metaModelLibrariesNames()->reject(name : String | aPackage.getAllSubPackageNames()->includes(name))) ? (not(packName = aPackage.getPackageName()))]
+	def depTasks = getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
+	depTasks.all { task ->
+		inputs.files(task.outputs)
+	}
 [/for]
 [/template]
 
