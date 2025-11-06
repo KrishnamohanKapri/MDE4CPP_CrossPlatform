@@ -100,11 +100,19 @@ task compileEcoreModels(){
 		, 'ocl:oclModel:generateOcl'
 		]
 	
+	// Ensure buildEcore completes before any dependent compilations
 	tasks.getByPath('uml:types:compileTypes').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('uml:uml:compileUml').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('fuml:compileFUML').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('pscs:compilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('pssm:compilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	
+	// Also ensure runCommandCompile tasks wait for buildEcore
+	tasks.getByPath('uml:types:runCommandCompileTypes').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('uml:uml:runCommandCompileUml').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('fuml:runCommandCompileFUML').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('pscs:runCommandCompilePSCS').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('pssm:runCommandCompilePSSM').mustRunAfter tasks.getByPath('ecore:buildEcore')
 }
 
 // Compile all without generating the models
@@ -136,6 +144,8 @@ task compileOCLAll() {
 	
 	tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter tasks.getByPath('ecore:buildEcore')
 	tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('ocl:oclModel:runCommandCompileOcl').mustRunAfter tasks.getByPath('ecore:buildEcore')
+	tasks.getByPath('ocl:oclParser:runCommandCompileOclParser').mustRunAfter tasks.getByPath('ecore:buildEcore')
 }
 
 task generateEcoreModels() {
