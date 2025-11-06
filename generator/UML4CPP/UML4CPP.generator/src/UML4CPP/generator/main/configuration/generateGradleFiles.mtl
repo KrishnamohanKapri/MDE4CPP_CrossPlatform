@@ -160,8 +160,7 @@ task build[packageName.toUpperFirst()/]() {
 
 [template private generateInputsFilesForRunCommand(aPackage : Package) {packageName : String = getPackageName();}]
 [for (packName : String | aPackage.collectIncludingModelNames()) ? (not(packName = aPackage.name))]
-	def depTasks = getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true)
-	depTasks.all { task ->
+	getRootProject().getTasksByName('build[packName.toUpperFirst()/]', true).all { task ->
 		inputs.files(task.outputs)
 	}
 [/for]
