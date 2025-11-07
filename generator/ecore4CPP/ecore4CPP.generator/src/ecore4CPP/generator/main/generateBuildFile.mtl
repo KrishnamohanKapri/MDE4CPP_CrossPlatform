@@ -166,15 +166,23 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 [/if]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
 	[comment Use task path directly for more reliable dependency resolution /]
-	[comment Handle special case: types package is always under uml in project structure /]
+	[comment Handle special cases: types package is always under uml, fUML/PSCS use lowercase directory names /]
 	[if (pack.name = 'types')]
 	dependsOn ':src:uml:types:buildTypes'
 	[else]
-		[comment Use generateNamespacePath to get full path, or pack.name for root packages /]
-		[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
-	dependsOn ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+		[if (pack.name = 'fUML')]
+	dependsOn ':src:fuml:buildFUML'
 		[else]
+			[if (pack.name = 'PSCS')]
+	dependsOn ':src:pscs:buildPSCS'
+			[else]
+				[comment Use generateNamespacePath to get full path, or pack.name for root packages /]
+				[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
+	dependsOn ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+				[else]
 	dependsOn ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]'
+				[/if]
+			[/if]
 		[/if]
 	[/if]
 [/for]
@@ -194,10 +202,18 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 					[if (pack.name = 'types')]
 					def taskPath = ':src:uml:types:buildTypes'
 					[else]
-						[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
-					def taskPath = ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+						[if (pack.name = 'fUML')]
+					def taskPath = ':src:fuml:buildFUML'
 						[else]
+							[if (pack.name = 'PSCS')]
+					def taskPath = ':src:pscs:buildPSCS'
+							[else]
+								[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
+					def taskPath = ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+								[else]
 					def taskPath = ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]'
+								[/if]
+							[/if]
 						[/if]
 					[/if]
 					throw new GradleException("Dependency library file does not exist: " + [pack.name/]LibFile.absolutePath + ". Task " + taskPath + " must complete first.")

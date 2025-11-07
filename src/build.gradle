@@ -127,14 +127,27 @@ task compileEcoreModels(){
 			if (buildTypesTask) {
 				allBuildTasks.add(buildTypesTask)
 			}
-			// Also get buildUml and buildFUML tasks for fuml, pscs, pssm
+			// Also get buildUml, buildFUML, buildPSCS, and reflection build tasks
 			def buildUmlTask = getRootProject().tasks.findByPath(':src:uml:uml:buildUml')
 			def buildFUMLTask = getRootProject().tasks.findByPath(':src:fuml:buildFUML')
+			def buildPSCSTask = getRootProject().tasks.findByPath(':src:pscs:buildPSCS')
+			def buildEcoreReflectionTask = getRootProject().tasks.findByPath(':src:common:ecoreReflection:buildEcoreReflection')
+			def buildPrimitivetypesReflectionTask = getRootProject().tasks.findByPath(':src:common:primitivetypesReflection:buildPrimitivetypesReflection')
+			
 			if (buildUmlTask) {
 				allBuildTasks.add(buildUmlTask)
 			}
 			if (buildFUMLTask) {
 				allBuildTasks.add(buildFUMLTask)
+			}
+			if (buildPSCSTask) {
+				allBuildTasks.add(buildPSCSTask)
+			}
+			if (buildEcoreReflectionTask) {
+				allBuildTasks.add(buildEcoreReflectionTask)
+			}
+			if (buildPrimitivetypesReflectionTask) {
+				allBuildTasks.add(buildPrimitivetypesReflectionTask)
 			}
 			
 			def runCommandTasks = [
@@ -167,7 +180,22 @@ task compileEcoreModels(){
 							task.mustRunAfter buildUmlTask
 							task.mustRunAfter buildFUMLTask
 						}
+						// pssm also needs pscs
+						if (buildPSCSTask && taskPath == 'pssm:runCommandCompilePSSM') {
+							task.mustRunAfter buildPSCSTask
+						}
 					}
+				}
+			}
+			
+			// Handle umlReflection separately
+			def umlReflectionTask = getRootProject().getTasksByName('common:umlReflection:runCommandCompileUmlReflection', true)
+			if (!umlReflectionTask.isEmpty() && buildUmlTask && buildEcoreReflectionTask && buildPrimitivetypesReflectionTask) {
+				umlReflectionTask.each { task ->
+					task.mustRunAfter buildEcoreTask
+					task.mustRunAfter buildUmlTask
+					task.mustRunAfter buildEcoreReflectionTask
+					task.mustRunAfter buildPrimitivetypesReflectionTask
 				}
 			}
 		}
