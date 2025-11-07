@@ -160,6 +160,10 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compile[packageName.toUpperFirst()/]Src'
 	}
 	dependsOn 'generate[packageName.toUpperFirst()/]'
+[if (aPackage.name = 'ecore')]
+	[comment Ensure abstractDataTypes headers are available before compiling ecore /]
+	dependsOn ':src:deliverBasicInterfaces'
+[/if]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
 	[comment Use task path directly for more reliable dependency resolution /]
 	[comment Use generateNamespacePath to get full path like uml/types instead of just types /]
@@ -235,6 +239,10 @@ task compile[packageName.toUpperFirst()/]() {
 	[comment Always ensure generation runs first /]
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 	mustRunAfter = ['['/]"generate[packageName.toUpperFirst()/]"[']'/]
+[if (aPackage.name = 'ecore')]
+	[comment Ensure abstractDataTypes headers are available before compiling ecore /]
+	dependsOn ':src:deliverBasicInterfaces'
+[/if]
 	
 	[comment Check if src_gen/build.gradle exists - if not, use runCommandCompile which will work after generation /]
 	def buildFile = file('src_gen'+ File.separator + 'build.gradle')
