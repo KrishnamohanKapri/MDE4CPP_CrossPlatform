@@ -76,8 +76,11 @@ task buildOCLAll() {
 	dependsOn 'ocl:oclModel:buildOcl'
 	dependsOn 'ocl:oclParser:buildOclParser'
 	
-	tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter getRootProject().tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter getRootProject().tasks.getByPath(':src:ecore:buildEcore')
+	afterEvaluate {
+		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
+		tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter buildEcoreTask
+		tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter buildEcoreTask
+	}
 }	
 
 task compileEcoreModels(){
