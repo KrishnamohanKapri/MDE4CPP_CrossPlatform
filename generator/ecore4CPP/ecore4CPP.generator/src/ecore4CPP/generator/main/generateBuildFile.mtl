@@ -171,12 +171,12 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 		def mde4cppHome = System.getenv('MDE4CPP_HOME')
 		if (mde4cppHome && OperatingSystem.current().isLinux()) {
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
-			def libFile = new File(mde4cppHome, 'application/bin/[pack.name/].so')
-			if (!libFile.exists()) {
+			def [pack.name/]LibFile = new File(mde4cppHome, 'application/bin/[pack.name/].so')
+			if (![pack.name/]LibFile.exists()) {
 				[comment Wait and retry to handle race conditions /]
 				sleep(2000)
-				if (!libFile.exists()) {
-					throw new GradleException("Dependency library file does not exist: " + libFile.absolutePath + ". Task :src:[pack.name/]:build[pack.name.toUpperFirst()/] must complete first.")
+				if (![pack.name/]LibFile.exists()) {
+					throw new GradleException("Dependency library file does not exist: " + [pack.name/]LibFile.absolutePath + ". Task :src:[pack.name/]:build[pack.name.toUpperFirst()/] must complete first.")
 				}
 			}
 [/for]
