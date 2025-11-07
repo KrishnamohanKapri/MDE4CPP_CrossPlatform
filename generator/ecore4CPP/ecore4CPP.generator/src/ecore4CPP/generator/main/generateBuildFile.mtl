@@ -267,6 +267,10 @@ task build[packageName.toUpperFirst()/]() {
 
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 	dependsOn 'compile[packageName.toUpperFirst()/]'
+[if (aPackage.name = 'ecore')]
+	[comment Ensure abstractDataTypes headers are available before building ecore /]
+	dependsOn ':src:deliverBasicInterfaces'
+[/if]
 [if(aPackage.prepareApplication())]
 	dependsOn 'compileApplicationFor[packageName.toUpperFirst()/]'
 [/if]
