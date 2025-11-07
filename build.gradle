@@ -66,7 +66,16 @@ task compileAll() {
 		tasks.getByPath('src:compileEcoreModels').mustRunAfter buildEcoreTask
 		tasks.getByPath('src:compileOCLAll').mustRunAfter buildEcoreTask
 		
-		// Also ensure runCommandCompile tasks wait for buildEcore and buildTypes
+		// Also ensure runCommandCompile tasks wait for all their build dependencies
+		def buildUmlTask = tasks.findByPath('src:uml:uml:buildUml')
+		def allBuildTasks = [buildEcoreTask]
+		if (buildTypesTask) {
+			allBuildTasks.add(buildTypesTask)
+		}
+		if (buildUmlTask) {
+			allBuildTasks.add(buildUmlTask)
+		}
+		
 		def runCommandTasks = [
 			'src:uml:types:runCommandCompileTypes',
 			'src:uml:uml:runCommandCompileUml',
@@ -78,10 +87,11 @@ task compileAll() {
 		runCommandTasks.each { taskPath ->
 			try {
 				def task = tasks.getByPath(taskPath)
-				task.mustRunAfter buildEcoreTask
-				// uml:uml:runCommandCompileUml needs buildTypes to complete first
-				if (buildTypesTask && taskPath == 'src:uml:uml:runCommandCompileUml') {
-					task.mustRunAfter buildTypesTask
+				// Wait for all build tasks to complete
+				allBuildTasks.each { buildTask ->
+					if (buildTask) {
+						task.mustRunAfter buildTask
+					}
 				}
 			} catch (Exception e) {
 				// Task might not exist, ignore

@@ -122,6 +122,17 @@ task compileEcoreModels(){
 			}
 			
 			// Also ensure runCommandCompile tasks wait for buildEcore and buildTypes (if they exist)
+			// Collect all build tasks that these runCommand tasks depend on
+			def allBuildTasks = [buildEcoreTask]
+			if (buildTypesTask) {
+				allBuildTasks.add(buildTypesTask)
+			}
+			// Also get buildUml task for fuml, pscs, pssm
+			def buildUmlTask = getRootProject().tasks.findByPath(':src:uml:uml:buildUml')
+			if (buildUmlTask) {
+				allBuildTasks.add(buildUmlTask)
+			}
+			
 			def runCommandTasks = [
 				'uml:types:runCommandCompileTypes',
 				'uml:uml:runCommandCompileUml',
@@ -133,9 +144,19 @@ task compileEcoreModels(){
 				def tasks = getRootProject().getTasksByName(taskPath, true)
 				if (!tasks.isEmpty()) {
 					tasks.each { task -> 
-						task.mustRunAfter buildEcoreTask
+						// Wait for all build tasks to complete
+						allBuildTasks.each { buildTask ->
+							if (buildTask) {
+								task.mustRunAfter buildTask
+							}
+						}
+						// Special case: uml:uml needs types first
 						if (buildTypesTask && taskPath == 'uml:uml:runCommandCompileUml') {
 							task.mustRunAfter buildTypesTask
+						}
+						// fuml, pscs, pssm need uml first
+						if (buildUmlTask && (taskPath == 'fuml:runCommandCompileFUML' || taskPath == 'pscs:runCommandCompilePSCS' || taskPath == 'pssm:runCommandCompilePSSM')) {
+							task.mustRunAfter buildUmlTask
 						}
 					}
 				}
