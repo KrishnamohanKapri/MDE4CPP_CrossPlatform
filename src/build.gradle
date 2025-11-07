@@ -76,8 +76,8 @@ task buildOCLAll() {
 	dependsOn 'ocl:oclModel:buildOcl'
 	dependsOn 'ocl:oclParser:buildOclParser'
 	
-	tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
+	tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter getRootProject().tasks.getByPath(':src:ecore:buildEcore')
+	tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter getRootProject().tasks.getByPath(':src:ecore:buildEcore')
 }	
 
 task compileEcoreModels(){
@@ -102,11 +102,12 @@ task compileEcoreModels(){
 	
 	// Ensure buildEcore completes before any dependent compilations
 	afterEvaluate {
-	tasks.getByPath('uml:types:compileTypes').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('uml:uml:compileUml').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('fuml:compileFUML').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('pscs:compilePSCS').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-	tasks.getByPath('pssm:compilePSSM').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
+		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
+		tasks.getByPath('uml:types:compileTypes').mustRunAfter buildEcoreTask
+		tasks.getByPath('uml:uml:compileUml').mustRunAfter buildEcoreTask
+		tasks.getByPath('fuml:compileFUML').mustRunAfter buildEcoreTask
+		tasks.getByPath('pscs:compilePSCS').mustRunAfter buildEcoreTask
+		tasks.getByPath('pssm:compilePSSM').mustRunAfter buildEcoreTask
 		
 		// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
 		def runCommandTasks = [
@@ -119,7 +120,7 @@ task compileEcoreModels(){
 		runCommandTasks.each { taskPath ->
 			def tasks = getRootProject().getTasksByName(taskPath, true)
 			if (!tasks.isEmpty()) {
-				tasks.each { task -> task.mustRunAfter tasks.getByPath('ecore:buildEcore') }
+				tasks.each { task -> task.mustRunAfter buildEcoreTask }
 			}
 		}
 	}
@@ -153,15 +154,16 @@ task compileOCLAll() {
 	dependsOn 'ocl:oclParser:compileOclParser'
 	
 	afterEvaluate {
-		tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
-		tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter tasks.getByPath(':src:ecore:buildEcore')
+		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
+		tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter buildEcoreTask
+		tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter buildEcoreTask
 		
 		// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
 		def oclRunCommandTasks = ['ocl:oclModel:runCommandCompileOcl']
 		oclRunCommandTasks.each { taskPath ->
 			def tasks = getRootProject().getTasksByName(taskPath, true)
 			if (!tasks.isEmpty()) {
-				tasks.each { task -> task.mustRunAfter tasks.getByPath('ecore:buildEcore') }
+				tasks.each { task -> task.mustRunAfter buildEcoreTask }
 			}
 		}
 	}
