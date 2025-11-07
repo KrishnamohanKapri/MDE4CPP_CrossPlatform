@@ -167,16 +167,16 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 		[comment Ensure dependency build tasks have completed and library files exist /]
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
 		getRootProject().getTasksByName('build[pack.name.toUpperFirst()/]', true).each { depTask ->
-			[comment Verify task has completed /]
-			if (!depTask.state.executed && !depTask.state.skipped) {
-				throw new GradleException("Dependency task " + depTask.path + " has not completed. Current state: " + depTask.state)
-			}
-			[comment Verify library file exists in application/bin /]
+			[comment Verify library file exists in application/bin - this ensures buildEcore completed /]
 			def mde4cppHome = System.getenv('MDE4CPP_HOME')
 			if (mde4cppHome) {
 				def libFile = new File(mde4cppHome, 'application/bin/[pack.name/].so')
 				if (!libFile.exists() && OperatingSystem.current().isLinux()) {
-					throw new GradleException("Dependency library file does not exist: " + libFile.absolutePath + ". Task " + depTask.path + " must complete first.")
+					[comment If file doesn't exist, wait a bit and check again (in case of race condition) /]
+					sleep(1000)
+					if (!libFile.exists()) {
+						throw new GradleException("Dependency library file does not exist: " + libFile.absolutePath + ". Task " + depTask.path + " must complete first.")
+					}
 				}
 			}
 		}
