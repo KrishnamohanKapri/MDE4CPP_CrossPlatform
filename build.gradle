@@ -59,10 +59,28 @@ task compileAll() {
 	dependsOn 'src:common:pluginFramework:compilePluginFramework'
 	dependsOn 'src:common:persistence:compilePersistence'
 	
-	// Ensure buildEcore completes before all compile tasks
+	// Ensure buildEcore completes before all compile tasks - use afterEvaluate to set mustRunAfter
 	afterEvaluate {
-		tasks.getByPath('src:compileEcoreModels').mustRunAfter tasks.getByPath('src:ecore:buildEcore')
-		tasks.getByPath('src:compileOCLAll').mustRunAfter tasks.getByPath('src:ecore:buildEcore')
+		def buildEcoreTask = tasks.getByPath('src:ecore:buildEcore')
+		tasks.getByPath('src:compileEcoreModels').mustRunAfter buildEcoreTask
+		tasks.getByPath('src:compileOCLAll').mustRunAfter buildEcoreTask
+		
+		// Also ensure runCommandCompile tasks wait for buildEcore
+		def runCommandTasks = [
+			'src:uml:types:runCommandCompileTypes',
+			'src:uml:uml:runCommandCompileUml',
+			'src:fuml:runCommandCompileFUML',
+			'src:pscs:runCommandCompilePSCS',
+			'src:pssm:runCommandCompilePSSM',
+			'src:ocl:oclModel:runCommandCompileOcl'
+		]
+		runCommandTasks.each { taskPath ->
+			try {
+				tasks.getByPath(taskPath).mustRunAfter buildEcoreTask
+			} catch (Exception e) {
+				// Task might not exist, ignore
+			}
+		}
 	}
 }
 
