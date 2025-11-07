@@ -162,7 +162,8 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 	dependsOn 'generate[packageName.toUpperFirst()/]'
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
 	[comment Use task path directly for more reliable dependency resolution /]
-	dependsOn ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+	[comment Use generateNamespacePath to get full path like uml/types instead of just types /]
+	dependsOn ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]'
 [/for]
 	[aPackage.generateInputsFilesForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
@@ -176,7 +177,7 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 				[comment Wait and retry to handle race conditions /]
 				sleep(2000)
 				if (![pack.name/]LibFile.exists()) {
-					throw new GradleException("Dependency library file does not exist: " + [pack.name/]LibFile.absolutePath + ". Task :src:[pack.name/]:build[pack.name.toUpperFirst()/] must complete first.")
+					throw new GradleException("Dependency library file does not exist: " + [pack.name/]LibFile.absolutePath + ". Task :src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/] must complete first.")
 				}
 			}
 [/for]
