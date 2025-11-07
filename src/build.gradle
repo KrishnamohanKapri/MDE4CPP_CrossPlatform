@@ -108,6 +108,7 @@ task compileEcoreModels(){
 	// Ensure buildEcore completes before any dependent compilations
 	project.afterEvaluate {
 		def buildEcoreTask = getRootProject().tasks.findByPath(':src:ecore:buildEcore')
+		def buildTypesTask = getRootProject().tasks.findByPath(':src:uml:types:buildTypes')
 		if (buildEcoreTask) {
 			tasks.getByPath('uml:types:compileTypes').mustRunAfter buildEcoreTask
 			tasks.getByPath('uml:uml:compileUml').mustRunAfter buildEcoreTask
@@ -115,7 +116,12 @@ task compileEcoreModels(){
 			tasks.getByPath('pscs:compilePSCS').mustRunAfter buildEcoreTask
 			tasks.getByPath('pssm:compilePSSM').mustRunAfter buildEcoreTask
 			
-			// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
+			// Ensure buildTypes completes before uml:uml:compileUml
+			if (buildTypesTask) {
+				tasks.getByPath('uml:uml:compileUml').mustRunAfter buildTypesTask
+			}
+			
+			// Also ensure runCommandCompile tasks wait for buildEcore and buildTypes (if they exist)
 			def runCommandTasks = [
 				'uml:types:runCommandCompileTypes',
 				'uml:uml:runCommandCompileUml',
@@ -126,7 +132,12 @@ task compileEcoreModels(){
 			runCommandTasks.each { taskPath ->
 				def tasks = getRootProject().getTasksByName(taskPath, true)
 				if (!tasks.isEmpty()) {
-					tasks.each { task -> task.mustRunAfter buildEcoreTask }
+					tasks.each { task -> 
+						task.mustRunAfter buildEcoreTask
+						if (buildTypesTask && taskPath == 'uml:uml:runCommandCompileUml') {
+							task.mustRunAfter buildTypesTask
+						}
+					}
 				}
 			}
 		}
