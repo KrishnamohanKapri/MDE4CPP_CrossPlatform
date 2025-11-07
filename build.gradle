@@ -48,6 +48,7 @@ task compileAll() {
 	description 'Compile all generated source code of models without generating the models'
 
 	dependsOn 'src:deliverBasicInterfaces'
+	dependsOn 'src:ecore:buildEcore'
 	
 	dependsOn 'src:compileEcoreModels'
 	dependsOn 'src:compileReflectionModels'
@@ -57,6 +58,12 @@ task compileAll() {
 	
 	dependsOn 'src:common:pluginFramework:compilePluginFramework'
 	dependsOn 'src:common:persistence:compilePersistence'
+	
+	// Ensure buildEcore completes before all compile tasks
+	afterEvaluate {
+		tasks.getByPath('src:compileEcoreModels').mustRunAfter tasks.getByPath('src:ecore:buildEcore')
+		tasks.getByPath('src:compileOCLAll').mustRunAfter tasks.getByPath('src:ecore:buildEcore')
+	}
 }
 
 task buildAll() {
