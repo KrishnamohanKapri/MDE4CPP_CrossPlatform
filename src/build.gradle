@@ -127,10 +127,14 @@ task compileEcoreModels(){
 			if (buildTypesTask) {
 				allBuildTasks.add(buildTypesTask)
 			}
-			// Also get buildUml task for fuml, pscs, pssm
+			// Also get buildUml and buildFUML tasks for fuml, pscs, pssm
 			def buildUmlTask = getRootProject().tasks.findByPath(':src:uml:uml:buildUml')
+			def buildFUMLTask = getRootProject().tasks.findByPath(':src:fuml:buildFUML')
 			if (buildUmlTask) {
 				allBuildTasks.add(buildUmlTask)
+			}
+			if (buildFUMLTask) {
+				allBuildTasks.add(buildFUMLTask)
 			}
 			
 			def runCommandTasks = [
@@ -154,9 +158,14 @@ task compileEcoreModels(){
 						if (buildTypesTask && taskPath == 'uml:uml:runCommandCompileUml') {
 							task.mustRunAfter buildTypesTask
 						}
-						// fuml, pscs, pssm need uml first
-						if (buildUmlTask && (taskPath == 'fuml:runCommandCompileFUML' || taskPath == 'pscs:runCommandCompilePSCS' || taskPath == 'pssm:runCommandCompilePSSM')) {
+						// fuml needs uml first
+						if (buildUmlTask && taskPath == 'fuml:runCommandCompileFUML') {
 							task.mustRunAfter buildUmlTask
+						}
+						// pscs and pssm need uml and fuml first
+						if (buildUmlTask && buildFUMLTask && (taskPath == 'pscs:runCommandCompilePSCS' || taskPath == 'pssm:runCommandCompilePSSM')) {
+							task.mustRunAfter buildUmlTask
+							task.mustRunAfter buildFUMLTask
 						}
 					}
 				}
