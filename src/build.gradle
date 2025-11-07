@@ -167,10 +167,11 @@ task compileEcoreModels(){
 								task.mustRunAfter buildTask
 							}
 						}
-						// Special case: uml:uml needs types first
-						if (buildTypesTask && taskPath == 'uml:uml:runCommandCompileUml') {
-							task.mustRunAfter buildTypesTask
-						}
+			// Special case: uml:uml needs types and ecore first
+			if (buildTypesTask && buildEcoreTask && taskPath == 'uml:uml:runCommandCompileUml') {
+				task.mustRunAfter buildTypesTask
+				task.mustRunAfter buildEcoreTask
+			}
 						// fuml needs uml first
 						if (buildUmlTask && taskPath == 'fuml:runCommandCompileFUML') {
 							task.mustRunAfter buildUmlTask

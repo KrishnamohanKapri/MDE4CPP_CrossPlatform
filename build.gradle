@@ -111,6 +111,11 @@ task compileAll() {
 						task.mustRunAfter buildTask
 					}
 				}
+				// Special ordering: uml:uml needs types and ecore first
+				if (buildTypesTask && buildEcoreTask && taskPath == 'src:uml:uml:runCommandCompileUml') {
+					task.mustRunAfter buildTypesTask
+					task.mustRunAfter buildEcoreTask
+				}
 				// Special ordering: pscs and pssm need fuml and uml
 				if (buildUmlTask && buildFUMLTask && (taskPath == 'src:pscs:runCommandCompilePSCS' || taskPath == 'src:pssm:runCommandCompilePSSM')) {
 					task.mustRunAfter buildUmlTask
