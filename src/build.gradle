@@ -76,10 +76,12 @@ task buildOCLAll() {
 	dependsOn 'ocl:oclModel:buildOcl'
 	dependsOn 'ocl:oclParser:buildOclParser'
 	
-	afterEvaluate {
-		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
-		tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter buildEcoreTask
-		tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter buildEcoreTask
+	project.afterEvaluate {
+		def buildEcoreTask = getRootProject().tasks.findByPath(':src:ecore:buildEcore')
+		if (buildEcoreTask) {
+			tasks.getByPath('ocl:oclModel:buildOcl').mustRunAfter buildEcoreTask
+			tasks.getByPath('ocl:oclParser:buildOclParser').mustRunAfter buildEcoreTask
+		}
 	}
 }	
 
@@ -104,26 +106,28 @@ task compileEcoreModels(){
 		]
 	
 	// Ensure buildEcore completes before any dependent compilations
-	afterEvaluate {
-		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
-		tasks.getByPath('uml:types:compileTypes').mustRunAfter buildEcoreTask
-		tasks.getByPath('uml:uml:compileUml').mustRunAfter buildEcoreTask
-		tasks.getByPath('fuml:compileFUML').mustRunAfter buildEcoreTask
-		tasks.getByPath('pscs:compilePSCS').mustRunAfter buildEcoreTask
-		tasks.getByPath('pssm:compilePSSM').mustRunAfter buildEcoreTask
-		
-		// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
-		def runCommandTasks = [
-			'uml:types:runCommandCompileTypes',
-			'uml:uml:runCommandCompileUml',
-			'fuml:runCommandCompileFUML',
-			'pscs:runCommandCompilePSCS',
-			'pssm:runCommandCompilePSSM'
-		]
-		runCommandTasks.each { taskPath ->
-			def tasks = getRootProject().getTasksByName(taskPath, true)
-			if (!tasks.isEmpty()) {
-				tasks.each { task -> task.mustRunAfter buildEcoreTask }
+	project.afterEvaluate {
+		def buildEcoreTask = getRootProject().tasks.findByPath(':src:ecore:buildEcore')
+		if (buildEcoreTask) {
+			tasks.getByPath('uml:types:compileTypes').mustRunAfter buildEcoreTask
+			tasks.getByPath('uml:uml:compileUml').mustRunAfter buildEcoreTask
+			tasks.getByPath('fuml:compileFUML').mustRunAfter buildEcoreTask
+			tasks.getByPath('pscs:compilePSCS').mustRunAfter buildEcoreTask
+			tasks.getByPath('pssm:compilePSSM').mustRunAfter buildEcoreTask
+			
+			// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
+			def runCommandTasks = [
+				'uml:types:runCommandCompileTypes',
+				'uml:uml:runCommandCompileUml',
+				'fuml:runCommandCompileFUML',
+				'pscs:runCommandCompilePSCS',
+				'pssm:runCommandCompilePSSM'
+			]
+			runCommandTasks.each { taskPath ->
+				def tasks = getRootProject().getTasksByName(taskPath, true)
+				if (!tasks.isEmpty()) {
+					tasks.each { task -> task.mustRunAfter buildEcoreTask }
+				}
 			}
 		}
 	}
@@ -156,17 +160,19 @@ task compileOCLAll() {
 	dependsOn 'ocl:oclModel:compileOcl'
 	dependsOn 'ocl:oclParser:compileOclParser'
 	
-	afterEvaluate {
-		def buildEcoreTask = getRootProject().tasks.getByPath(':src:ecore:buildEcore')
-		tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter buildEcoreTask
-		tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter buildEcoreTask
-		
-		// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
-		def oclRunCommandTasks = ['ocl:oclModel:runCommandCompileOcl']
-		oclRunCommandTasks.each { taskPath ->
-			def tasks = getRootProject().getTasksByName(taskPath, true)
-			if (!tasks.isEmpty()) {
-				tasks.each { task -> task.mustRunAfter buildEcoreTask }
+	project.afterEvaluate {
+		def buildEcoreTask = getRootProject().tasks.findByPath(':src:ecore:buildEcore')
+		if (buildEcoreTask) {
+			tasks.getByPath('ocl:oclModel:compileOcl').mustRunAfter buildEcoreTask
+			tasks.getByPath('ocl:oclParser:compileOclParser').mustRunAfter buildEcoreTask
+			
+			// Also ensure runCommandCompile tasks wait for buildEcore (if they exist)
+			def oclRunCommandTasks = ['ocl:oclModel:runCommandCompileOcl']
+			oclRunCommandTasks.each { taskPath ->
+				def tasks = getRootProject().getTasksByName(taskPath, true)
+				if (!tasks.isEmpty()) {
+					tasks.each { task -> task.mustRunAfter buildEcoreTask }
+				}
 			}
 		}
 	}
