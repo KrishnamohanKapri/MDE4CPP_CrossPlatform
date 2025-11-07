@@ -191,7 +191,15 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 				sleep(2000)
 				if (![pack.name/]LibFile.exists()) {
 					[comment Construct task path for error message /]
-					def taskPath = '[pack.name/]' = 'types' ? ':src:uml:types:buildTypes' : (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/' ? ':src:[pack.name/]:build[pack.name.toUpperFirst()/]' : ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]')
+					[if (pack.name = 'types')]
+					def taskPath = ':src:uml:types:buildTypes'
+					[else]
+						[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
+					def taskPath = ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+						[else]
+					def taskPath = ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]'
+						[/if]
+					[/if]
 					throw new GradleException("Dependency library file does not exist: " + [pack.name/]LibFile.absolutePath + ". Task " + taskPath + " must complete first.")
 				}
 			}
