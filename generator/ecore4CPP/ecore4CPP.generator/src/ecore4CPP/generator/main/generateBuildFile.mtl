@@ -163,7 +163,12 @@ task runCommandCompile[packageName.toUpperFirst()/](type:Exec) {[comment interna
 [for (pack : EPackage | aPackage.metaModelLibraries()->reject(doNotGenerateEPackage())) ? (not(pack.name = aPackage.name))]
 	[comment Use task path directly for more reliable dependency resolution /]
 	[comment Use generateNamespacePath to get full path like uml/types instead of just types /]
+	[comment Handle root packages where generateNamespacePath returns empty string or '/' /]
+	[if (pack.generateNamespacePath() = '' or pack.generateNamespacePath() = '/')]
+	dependsOn ':src:[pack.name/]:build[pack.name.toUpperFirst()/]'
+	[else]
 	dependsOn ':src:[pack.generateNamespacePath()/]:build[pack.name.toUpperFirst()/]'
+	[/if]
 [/for]
 	[aPackage.generateInputsFilesForRunCommand()/]
 	[aPackage.generateMustRunAfter()/]
