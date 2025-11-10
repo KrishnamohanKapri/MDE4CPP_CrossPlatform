@@ -47,6 +47,9 @@ task compileAll() {
 	group 'MDE4CPP'
 	description 'Compile all generated source code of models without generating the models'
 
+	// Ensure generateAll completes before compileAll starts
+	dependsOn 'generateAll'
+
 	dependsOn 'src:deliverBasicInterfaces'
 	dependsOn 'src:ecore:buildEcore'
 	
@@ -142,22 +145,10 @@ task buildAll() {
 	group 'MDE4CPP'
 	description 'build generators and all models'
 
-	dependsOn 'generateAll'
-	dependsOn 'compileAll'
+	// Only depend on the final task - this creates a chain:
+	// buildAll -> src:buildOCLAll -> compileAll -> generateAll
+	// This ensures true sequential execution where each task waits for the previous to complete
 	dependsOn 'src:buildOCLAll'
-	
-	// Ensure sequential execution: generateAll -> compileAll -> src:buildOCLAll
-	afterEvaluate {
-		def generateAllTask = tasks.getByPath('generateAll')
-		def compileAllTask = tasks.getByPath('compileAll')
-		def buildOCLAllTask = tasks.getByPath('src:buildOCLAll')
-		
-		// compileAll must run after generateAll
-		compileAllTask.mustRunAfter generateAllTask
-		
-		// src:buildOCLAll must run after compileAll (which implicitly means after generateAll too)
-		buildOCLAllTask.mustRunAfter compileAllTask
-	}
 }
 
 
