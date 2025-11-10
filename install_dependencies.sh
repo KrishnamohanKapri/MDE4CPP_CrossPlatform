@@ -35,7 +35,8 @@ if [ "$IS_ROOT" = true ]; then
         g++-mingw-w64-x86-64 \
         gcc-mingw-w64-x86-64 \
         gnupg \
-        ca-certificates
+        ca-certificates \
+        uuid-dev
     
     # Configure MinGW-w64 alternatives
     update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix 2>/dev/null || true
@@ -55,7 +56,7 @@ else
     echo "Skipping system package installation (requires root)"
     echo "Please run these commands manually:"
     echo "  sudo apt-get update"
-    echo "  sudo apt-get install -y openjdk-21-jdk build-essential gcc g++ git wget unzip tar mingw-w64 g++-mingw-w64-x86-64 gcc-mingw-w64-x86-64"
+    echo "  sudo apt-get install -y openjdk-21-jdk build-essential gcc g++ git wget unzip tar mingw-w64 g++-mingw-w64-x86-64 gcc-mingw-w64-x86-64 uuid-dev"
     echo "  sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix"
     echo "  sudo update-alternatives --set x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc-posix"
 fi

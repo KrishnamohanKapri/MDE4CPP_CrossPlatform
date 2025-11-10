@@ -41,6 +41,16 @@ else
 fi
 echo ""
 
+# Check uuid-dev
+echo "Checking uuid-dev..."
+if [ -f "/usr/include/uuid/uuid.h" ]; then
+    echo "✓ uuid-dev installed"
+else
+    echo "✗ uuid-dev not found"
+    echo "  Install with: sudo apt-get install uuid-dev"
+fi
+echo ""
+
 # Check MinGW-w64
 echo "Checking MinGW-w64..."
 if command -v x86_64-w64-mingw32-g++ &> /dev/null; then
