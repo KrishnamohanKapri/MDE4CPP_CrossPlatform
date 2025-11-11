@@ -33,12 +33,6 @@ while IFS= read -r line; do
     fi
 done < <(sed '/^cd \.\/gradlePlugins$/,$d' setenv)
 
-# Also publish gradle plugins if needed (this is normally done in setenv)
-if [ -d "gradlePlugins" ]; then
-    echo "Publishing MDE4CPP Gradle plugins..."
-    (cd gradlePlugins && ./application/tools/gradlew publishMDE4CPPPluginsToMavenLocal >/dev/null 2>&1 || true)
-fi
-
 # Use hardcoded gradlew path
 GRADLEW="./application/tools/gradlew"
 
@@ -46,6 +40,13 @@ if [ ! -f "$GRADLEW" ]; then
     echo "Error: gradlew not found at $GRADLEW"
     echo "Please ensure you're running this script from the MDE4CPP_CrossPlatform directory."
     exit 1
+fi
+
+# Publish gradle plugins if needed (this is normally done in setenv)
+# Do this after GRADLEW is defined so we can use it
+if [ -d "gradlePlugins" ]; then
+    echo "Publishing MDE4CPP Gradle plugins..."
+    (cd gradlePlugins && "$GRADLEW" publishMDE4CPPPluginsToMavenLocal >/dev/null 2>&1 || true)
 fi
 
 echo "=========================================="
