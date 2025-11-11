@@ -147,10 +147,10 @@ task compilePersistence(type: tui.sse.mde4cpp.MDE4CPPCompile) {
 	group "Persistence"
 	description "compile Persistence"
 
-	def xercesBuildFile = file('xerces'+File.separator+'bin')
-	if(!xercesBuildFile.exists()){ 
-		dependsOn 'compileXerces'
-	}
+	// Always depend on compileXerces to ensure xerces library is available
+	// This prevents race conditions when running with multiple workers
+	dependsOn 'compileXerces'
+	
 	projectFolder = file('.')
 
 	inputs.files(fileTree('.') {
@@ -202,7 +202,8 @@ task compilePersistence(type: tui.sse.mde4cpp.MDE4CPPCompile) {
 	dependsOn pluginFramwork
 	inputs.files(pluginFramwork.outputs)
 	
-	mustRunAfter = ["compileXerces"]
+	// Also add compileXerces outputs as inputs to ensure xerces is fully installed
+	inputs.files(compileXerces.outputs)
 }
 
 task clean {
