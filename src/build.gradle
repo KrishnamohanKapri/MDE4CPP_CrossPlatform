@@ -72,9 +72,6 @@ task buildOCLAll() {
 	group 'Source'
 	description 'generate and compile All OCL components meta-model and parser'
 	
-	// Ensure compileAll completes before buildOCLAll starts
-	dependsOn ':compileAll'
-	
 	dependsOn 'ecore:buildEcore'
 	dependsOn 'ocl:oclModel:buildOcl'
 	dependsOn 'ocl:oclParser:buildOclParser'
