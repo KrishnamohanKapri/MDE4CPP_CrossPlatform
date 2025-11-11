@@ -46,7 +46,7 @@ fi
 # Do this after GRADLEW is defined so we can use it
 if [ -d "gradlePlugins" ]; then
     echo "Publishing MDE4CPP Gradle plugins..."
-    (cd gradlePlugins && "$GRADLEW" publishMDE4CPPPluginsToMavenLocal >/dev/null 2>&1 || true)
+    (./application/tools/gradlew publishMDE4CPPPluginsToMavenLocal >/dev/null 2>&1 || true)
 fi
 
 echo "=========================================="
