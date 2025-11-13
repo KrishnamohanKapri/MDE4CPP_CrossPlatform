@@ -121,8 +121,8 @@ task compileOclParser(type: tui.sse.mde4cpp.MDE4CPPCompile) {
 	outputs.dir([rootDir,'application','include','oclParser'].join(File.separator))
 	
 	// dependency to 'ocl model'
-											
-	dependsOn rootProject.tasks.getByPath('src:ocl:oclModel:model:generateOclModel')
+	// Note: oclModel tasks use path 'ocl:oclModel:...' not 'src:ocl:oclModel:...'
+	dependsOn getRootProject().getTasksByName('ocl:oclModel:generateOcl', true)
 	dependsOn getRootProject().getTasksByName('compileOcl', true)	
 //	dependsOn rootProject.tasks.getByPath(':generator:ecore4CPP:ecore4CPP.generator:deliverEcore4CPP')
 //	dependsOn rootProject.tasks.getByPath(':generator:ecore4CPP:ecore4CPP.generator:deliverEcore4CPP')
