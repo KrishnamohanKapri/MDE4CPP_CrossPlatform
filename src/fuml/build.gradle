@@ -8,6 +8,7 @@ import org.gradle.internal.os.OperatingSystem;
 
 description 'Build task for project: fUML'
 
+
 task runCommandCompileFUML(type:Exec) {
 	workingDir project.projectDir
 	def rootPath = project.rootDir.toPath()
@@ -21,13 +22,59 @@ task runCommandCompileFUML(type:Exec) {
 	} else {
 		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compileFUMLSrc'
 	}
-	mustRunAfter =  [
-		'generateFUML'
-	
-		, getRootProject().getTasksByName('compileTypes', true)
-		, getRootProject().getTasksByName('compileEcore', true)
-		, getRootProject().getTasksByName('compileUml', true)
-	]
+	dependsOn 'generateFUML'
+	dependsOn ':src:uml:types:buildTypes'
+	dependsOn ':src:uml:buildUml'
+	dependsOn ':src:ecore:buildEcore'
+		def allDepOutputs = files()
+		getRootProject().getTasksByName('buildTypes', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		getRootProject().getTasksByName('buildUml', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		getRootProject().getTasksByName('buildEcore', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		inputs.files(allDepOutputs)
+		mustRunAfter = [
+			'generateFUML'
+			, getRootProject().getTasksByName('compileTypes', true)
+			, getRootProject().getTasksByName('buildTypes', true)
+			, getRootProject().getTasksByName('compileUml', true)
+			, getRootProject().getTasksByName('buildUml', true)
+			, getRootProject().getTasksByName('compileEcore', true)
+			, getRootProject().getTasksByName('buildEcore', true)
+		]
+	doFirst {
+		def mde4cppHome = System.getenv('MDE4CPP_HOME')
+		if (mde4cppHome && OperatingSystem.current().isLinux()) {
+			def typesLibFile = new File(mde4cppHome, 'application/bin/types.so')
+			if (!typesLibFile.exists()) {
+				sleep(2000)
+				if (!typesLibFile.exists()) {
+					def taskPath = ':src:uml:types:buildTypes'
+					throw new GradleException("Dependency library file does not exist: " + typesLibFile.absolutePath + ". Task " + taskPath + " must complete first.")
+				}
+			}
+			def umlLibFile = new File(mde4cppHome, 'application/bin/uml.so')
+			if (!umlLibFile.exists()) {
+				sleep(2000)
+				if (!umlLibFile.exists()) {
+					def taskPath = ':src:uml:buildUml'
+					throw new GradleException("Dependency library file does not exist: " + umlLibFile.absolutePath + ". Task " + taskPath + " must complete first.")
+				}
+			}
+			def ecoreLibFile = new File(mde4cppHome, 'application/bin/ecore.so')
+			if (!ecoreLibFile.exists()) {
+				sleep(2000)
+				if (!ecoreLibFile.exists()) {
+					def taskPath = ':src:ecore:buildEcore'
+					throw new GradleException("Dependency library file does not exist: " + ecoreLibFile.absolutePath + ". Task " + taskPath + " must complete first.")
+				}
+			}
+		}
+	}
 }
 
 task runCommandGenerateFUML(type: tui.sse.mde4cpp.MDE4CPPGenerate) {
@@ -55,25 +102,26 @@ task compileFUML() {
 	group 'fUML'
 	description 'compile fUML' 
 
+	dependsOn 'generateFUML'
+	mustRunAfter = ["generateFUML"]
+	
 	def buildFile = file('src_gen'+ File.separator + 'build.gradle')
-
-	if(!buildFile.exists()){ 
-		dependsOn 'generateFUML' 
-		mustRunAfter = ["generateFUML"]
+	
+	if(buildFile.exists()) {
+		dependsOn 'src_gen:compileFUMLSrc'
+	} else {
 		dependsOn 'runCommandCompileFUML'
 	}
-	else
-	{
-		mustRunAfter = ["generateFUML"]
-		dependsOn 'src_gen:compileFUMLSrc'
-	} 
-	mustRunAfter =  [
-		'generateFUML'
 	
-		, getRootProject().getTasksByName('compileTypes', true)
-		, getRootProject().getTasksByName('compileEcore', true)
-		, getRootProject().getTasksByName('compileUml', true)
-	]
+		mustRunAfter = [
+			'generateFUML'
+			, getRootProject().getTasksByName('compileTypes', true)
+			, getRootProject().getTasksByName('buildTypes', true)
+			, getRootProject().getTasksByName('compileUml', true)
+			, getRootProject().getTasksByName('buildUml', true)
+			, getRootProject().getTasksByName('compileEcore', true)
+			, getRootProject().getTasksByName('buildEcore', true)
+		]
 }
 
 
@@ -85,6 +133,6 @@ task buildFUML() {
 	dependsOn 'compileFUML'
 
 	dependsOn getRootProject().getTasksByName('buildTypes', true)
-	dependsOn getRootProject().getTasksByName('buildEcore', true)
 	dependsOn getRootProject().getTasksByName('buildUml', true)
+	dependsOn getRootProject().getTasksByName('buildEcore', true)
 }

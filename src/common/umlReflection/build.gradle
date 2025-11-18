@@ -21,13 +21,45 @@ task runCommandCompileUmlReflection(type:Exec) {
 	} else {
 		commandLine '/bin/sh', '-c', gradlewRelPath + ' src_gen:compileUmlReflectionSrc'
 	}
-	mustRunAfter =  [
-		"generateUmlReflection" 
-		, getRootProject().getTasksByName('compileEcore', true)
-		, getRootProject().getTasksByName('compileUml', true)
-		, getRootProject().getTasksByName('compileEcoreReflection', true)
-		, getRootProject().getTasksByName('compilePrimitivetypesReflection', true)
-	]
+	dependsOn 'generateUmlReflection'
+		getRootProject().getTasksByName('buildEcore', true).each { task ->
+			dependsOn task
+		}
+		getRootProject().getTasksByName('buildUml', true).each { task ->
+			dependsOn task
+		}
+		getRootProject().getTasksByName('buildEcoreReflection', true).each { task ->
+			dependsOn task
+		}
+		getRootProject().getTasksByName('buildPrimitivetypesReflection', true).each { task ->
+			dependsOn task
+		}
+	
+		def allDepOutputs = files()
+		getRootProject().getTasksByName('buildEcore', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		getRootProject().getTasksByName('buildUml', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		getRootProject().getTasksByName('buildEcoreReflection', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		getRootProject().getTasksByName('buildPrimitivetypesReflection', true).each { task ->
+			allDepOutputs.from(task.outputs.files)
+		}
+		inputs.files(allDepOutputs)
+		mustRunAfter = [
+			"generateUmlReflection"
+			, getRootProject().getTasksByName('compileEcore', true)
+			, getRootProject().getTasksByName('buildEcore', true)
+			, getRootProject().getTasksByName('compileUml', true)
+			, getRootProject().getTasksByName('buildUml', true)
+			, getRootProject().getTasksByName('compileEcoreReflection', true)
+			, getRootProject().getTasksByName('buildEcoreReflection', true)
+			, getRootProject().getTasksByName('compilePrimitivetypesReflection', true)
+			, getRootProject().getTasksByName('buildPrimitivetypesReflection', true)
+		]
 }
 
 task runCommandGenerateUmlReflection(type: tui.sse.mde4cpp.MDE4CPPGenerate) {
@@ -55,24 +87,28 @@ task compileUmlReflection() {
 	group 'umlReflection'
 	description 'compile umlReflection'
 
+	dependsOn 'generateUmlReflection'
+	mustRunAfter = ["generateUmlReflection"]
+	
 	def buildFile = file('src_gen/build.gradle')
-	if(!buildFile.exists()){ 
-		dependsOn 'generateUmlReflection'
-		mustRunAfter = ["generateUmlReflection"]
+	
+	if(buildFile.exists()) {
+		dependsOn 'src_gen:compileUmlReflectionSrc'
+	} else {
 		dependsOn 'runCommandCompileUmlReflection'
 	}
-	else
-	{
-		mustRunAfter = ["generateUmlReflection"]
-		dependsOn 'src_gen:compileUmlReflectionSrc'
-	}
-	mustRunAfter =  [
-		"generateUmlReflection" 
-		, getRootProject().getTasksByName('compileEcore', true)
-		, getRootProject().getTasksByName('compileUml', true)
-		, getRootProject().getTasksByName('compileEcoreReflection', true)
-		, getRootProject().getTasksByName('compilePrimitivetypesReflection', true)
-	]
+	
+		mustRunAfter = [
+			"generateUmlReflection"
+			, getRootProject().getTasksByName('compileEcore', true)
+			, getRootProject().getTasksByName('buildEcore', true)
+			, getRootProject().getTasksByName('compileUml', true)
+			, getRootProject().getTasksByName('buildUml', true)
+			, getRootProject().getTasksByName('compileEcoreReflection', true)
+			, getRootProject().getTasksByName('buildEcoreReflection', true)
+			, getRootProject().getTasksByName('compilePrimitivetypesReflection', true)
+			, getRootProject().getTasksByName('buildPrimitivetypesReflection', true)
+		]
 }
 
 
